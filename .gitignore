@@ -16,4 +16,4 @@ DerivedData
 .idea/
 *.hmap
 *.xml
-*.xcuserdata
+*.xcuserstate
