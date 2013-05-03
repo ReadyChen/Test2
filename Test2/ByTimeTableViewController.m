@@ -22,8 +22,7 @@
 
 DataSource *DS;
 MapViewController *mapViewCtrl;
-UIBarButtonItem *naButton;
-BOOL bAddLeavedTimeFlag = false;
+UIBarButtonItem *naByTimeButton;
 
 -(IBAction)deleteAction:(UIBarButtonItem *)sender{
     UIBarButtonItem* btn = sender;
@@ -32,16 +31,15 @@ BOOL bAddLeavedTimeFlag = false;
     {
         case 1:
         {
-            if(bAddLeavedTimeFlag)
-            {
-                sender.title = @"- 已離開";
-            }
-            else
+            if(DS.bAddLeavedFlag)
             {
                 sender.title = @"+ 已離開";
             }
-            bAddLeavedTimeFlag = !bAddLeavedTimeFlag;
-            DS.bAddLeavedFlag = bAddLeavedTimeFlag;
+            else
+            {
+                sender.title = @"- 已離開";
+            }
+            DS.bAddLeavedFlag = !DS.bAddLeavedFlag;
             [DS FilteringSortedArrayWithAdjust:0];
             [DS.tableDistView reloadData];
             [DS.tableTimeView reloadData];
@@ -68,20 +66,12 @@ BOOL bAddLeavedTimeFlag = false;
     
     // 改寫 nav 後的 btn 顯示名稱
     UIBarButtonItem *temporaryBarButtonItem = [[UIBarButtonItem alloc] init];
-    temporaryBarButtonItem.title = @"Back";
+    temporaryBarButtonItem.title = @"返回";
     self.navigationItem.backBarButtonItem = temporaryBarButtonItem;
     
     // 在畫面上方 添加一排 btns, btns 透過 .tag 作為按下之後的 switch case 識別
-    naButton = [[UIBarButtonItem alloc] initWithTitle:@"+ 已離開" style:UIBarButtonItemStyleBordered target:self action:@selector(deleteAction:)];
-    naButton.tag = 1;
-    if(bAddLeavedTimeFlag)
-    {
-        naButton.title = @"- 已離開";
-    }
-    else
-    {
-        naButton.title = @"+ 已離開";
-    }
+    naByTimeButton = [[UIBarButtonItem alloc] initWithTitle:@"TBD 已離開" style:UIBarButtonItemStyleBordered target:self action:@selector(deleteAction:)];
+    naByTimeButton.tag = 1;
     
     UIBarButtonItem *subRangeButton = [[UIBarButtonItem alloc] initWithTitle:@"- 距離範圍" style:UIBarButtonItemStyleBordered target:self action:@selector(deleteAction:)];
     subRangeButton.tag = 2;
@@ -104,28 +94,25 @@ BOOL bAddLeavedTimeFlag = false;
     
     //self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects:doneButton, refreshButton, nil];
     self.navigationItem.leftItemsSupplementBackButton = YES;
-    self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:addRangeButton, subRangeButton, naButton, nil];
+    self.navigationItem.rightBarButtonItems = [NSArray arrayWithObjects:addRangeButton, subRangeButton, naByTimeButton, nil];
 
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    NSLog(@" ByTime viewWillAppear");
-    bAddLeavedTimeFlag = DS.bAddLeavedFlag;
-    
-    if(bAddLeavedTimeFlag)
+    if(DS.bAddLeavedFlag)
     {
-        naButton.title = @"- 已離開";
+        naByTimeButton.title = @"- 已離開";
     }
     else
     {
-        naButton.title = @"+ 已離開";
+        naByTimeButton.title = @"+ 已離開";
     }
 }
 
 -(void)viewDidAppear:(BOOL)animated
 {
-    NSLog(@" ByTime viewDidAppear");
+    
 }
 
 - (void)viewDidLoad
@@ -141,7 +128,6 @@ BOOL bAddLeavedTimeFlag = false;
         DS = [[DataSource alloc] init];
     }
     DS.tableTimeView = self.tableView;
-    DS.bAddLeavedFlag = bAddLeavedTimeFlag;
     
     if(!mapViewCtrl)
         mapViewCtrl = [self.storyboard instantiateViewControllerWithIdentifier:@"MapVC"];

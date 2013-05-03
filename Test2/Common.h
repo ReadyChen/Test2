@@ -22,5 +22,6 @@
 #define DegreesToRadians(degrees)(degrees * M_PI / 180.0)
 
 #define DEBUG_HHMM TRUE
+#define DISPLAY_RANGE 10
 
 #endif

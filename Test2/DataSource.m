@@ -46,7 +46,7 @@
         // Parse the XML into a dictionary
         //NSDictionary *xmlDictionary = [XMLReader dictionaryForXMLString:testXMLString error:&parseError];
         
-        NSString *path = [[NSBundle mainBundle] pathForResource:@"TPE_V3_4133" ofType:@"xml"];
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"TPE_V5_4133" ofType:@"xml"];
         NSData *nsData = [NSData dataWithContentsOfFile:path];
         NSDictionary *xmlDictionary = [XMLReader dictionaryForXMLData:nsData error:&parseError];
         
@@ -54,8 +54,10 @@
         //NSLog(@"%@", xmlDictionary);
         [self describeDictionary:xmlDictionary];
         
-        iDisplayRang = 5;
+        iDisplayRang = DISPLAY_RANGE;
         [self FilteringSortedArrayWithAdjust:0];
+        
+        bAddLeavedFlag = false;
     }
     return self;
 }
@@ -184,6 +186,7 @@
         // 確保不會使 iDisplayRang 減成負值
         iDisplayRang = iDisplayRang + iAdjustRang;
     }
+    NSLog(@" iDisplayRang = %i ",iDisplayRang);
     
     // 產生 filteredByDistMyArray
     for (NSDictionary *dict in sortedByDistMyArray)
@@ -289,7 +292,14 @@
     {
         //@"--:--已到達,%02i:%02i後離開"
         iRet = 1;
-        retLabel.text = [NSString stringWithFormat:@"--:--已到達,%02i:%02i後離開", componentsEnd.hour, componentsEnd.minute];
+        if(componentsEnd.hour==0 && componentsEnd.minute==0)
+        {
+            retLabel.text = [NSString stringWithFormat:@"--:--已到達,正在離開"];
+        }
+        else
+        {
+            retLabel.text = [NSString stringWithFormat:@"--:--已到達,%02i:%02i後離開", componentsEnd.hour, componentsEnd.minute];
+        }
     }
     if(componentsEnd.hour < 0 || componentsEnd.minute < 0 )
     {
