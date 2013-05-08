@@ -133,7 +133,10 @@
             NSCalendar*calendar2 =[NSCalendar currentCalendar];
             NSDateComponents *comps2 =[calendar2 components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit|
                                       NSHourCalendarUnit|NSMinuteCalendarUnit|NSSecondCalendarUnit fromDate:dateEndHHMM];
-            [comps2 setHour:[EH intValue]];
+            int iEH = [EH intValue];
+            if ( iEH>0&&iEH<=3 ) // (00會以24顯示)不處理, 只處理 凌晨 01,02,03 跨日
+                iEH = iEH+24;
+            [comps2 setHour:iEH];
             [comps2 setMinute:[EM intValue]];
             [comps2 setSecond:0];
             dateEndHHMM =[calendar2 dateFromComponents:comps2];
@@ -260,18 +263,16 @@
     NSInteger iRet = 0;
     
     NSDate *dateNow = [[NSDate alloc] init];
+    
+    // 開關, 如這裡關起來, 將使用系統正確時間, 打開, 將使用 Debug HH MM
     if(DEBUG_HHMM)
     {
-        // 這裡關起來 , 使用正確時間
-        NSInteger iTempHH = 18;
-        NSInteger iTempMM = 35;
-        
         // 準備 set Start HH MM
         NSCalendar *calendar1 = [NSCalendar currentCalendar];
         NSDateComponents *comps =[calendar1 components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit|
                                   NSHourCalendarUnit|NSMinuteCalendarUnit|NSSecondCalendarUnit fromDate:dateNow];
-        [comps setHour:iTempHH];
-        [comps setMinute:iTempMM];
+        [comps setHour:DEBUG_HH];
+        [comps setMinute:DEBUG_MM];
         [comps setSecond:0];
         
         // 執行 set Start HH MM , 更新 date 形態的 StartHHMM
