@@ -26,13 +26,13 @@ MyAnnotation *lastAnnotation;
 
 
 - (void)dealloc {
-    NSLog(@" MapViewContrl dealloc");
+    //NSLog(@" MapViewContrl dealloc");
     //[super dealloc];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    NSLog(@" MapViewContrl viewWillAppear");
+    //NSLog(@" MapViewContrl viewWillAppear");
 
     // mapView setRegion:mapViewRegion 交給 Thread 去觸發 , 但 App 第一次執行 都還是會 卡住 Region
     [self performSelectorOnMainThread:@selector(updateMyMap) withObject:nil waitUntilDone:NO];
@@ -53,7 +53,7 @@ MyAnnotation *lastAnnotation;
 
 - (void)viewDidLoad
 {
-    NSLog(@" MapViewContrl viewDidLoad");
+    //NSLog(@" MapViewContrl viewDidLoad");
     
     [super viewDidLoad];
     
@@ -64,7 +64,7 @@ MyAnnotation *lastAnnotation;
 
 -(void) updateMyMap {
     
-    NSLog(@" MapViewContrl updateMyMap");
+    //NSLog(@" MapViewContrl updateMyMap");
     [mapView setRegion:mapViewRegion animated:YES];
 }
 

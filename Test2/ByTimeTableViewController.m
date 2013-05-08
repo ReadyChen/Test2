@@ -179,31 +179,49 @@ UIBarButtonItem *naByTimeButton;
 
 -(void)setOneRawData:(NSDictionary *)dictionary toCell:(ByTimeViewCell *)cell
 { 
-    // 準備 距離 差
-    float fDist = [[dictionary objectForKey:@"Dist"] doubleValue];
-    fDist = fDist/1000;
-    NSString *strDist = [NSString stringWithFormat:@"距離%.2f公里",fDist];
-    
     // 準備 方向度數
-    CLLocationManager *tmpLocationManager = [DS locationManager];
-    if( tmpLocationManager.location.coordinate.latitude!=0 || tmpLocationManager.location.coordinate.longitude!=0 )
+    CLLocationManager *userLocation = [DS locationManager];
+    if( userLocation.location.coordinate.latitude!=0 || userLocation.location.coordinate.longitude!=0 )
     {
         // 如果不是 Zero , 才 計算方向 + 顯示方向,
         CLLocationCoordinate2D trashCoordinate;
         trashCoordinate.latitude = [[dictionary objectForKey:@"Latitude"] doubleValue];
         trashCoordinate.longitude = [[dictionary objectForKey:@"Longitude"] doubleValue];
         
-        float deltaLatitude = trashCoordinate.latitude - tmpLocationManager.location.coordinate.latitude;
-        float deltaLongitude = trashCoordinate.longitude - tmpLocationManager.location.coordinate.longitude;
-        float angle = atan2(deltaLongitude, deltaLatitude) * 180 / M_PI;
+        float deltaLatitude = trashCoordinate.latitude - userLocation.location.coordinate.latitude;
+        float deltaLongitude = trashCoordinate.longitude - userLocation.location.coordinate.longitude;
+        float angle = atan2(deltaLongitude, deltaLatitude) * 180 / M_PI - 90;
+        // 產生的 angle 是由 12點鐘方向為 0,到3點鐘為 90,6點鐘為180, 特別是9點鐘為 -90, 7點鐘為 -170
+        // 為了要轉換成 , 四象限 先減 90 , 在進行下列 if fabsf -360 修正
         
-        cell.fourthLabel.text = [NSString stringWithFormat:@"%.0f", angle];
+        if(angle>0)
+        {
+            angle = fabsf(angle - 360);
+        }
+        else
+        {
+            angle = fabsf(angle);
+        }
+        // 此時得到 四象限的 angle 值
+        cell.fAngle = angle;
+        
+        // 不再透過 Label 顯示 Arrow
+        //cell.fourthLabel.text = [NSString stringWithFormat:@"%.0f", angle];
+
+        // 因為是 re-use cell , 需要透過 setNeedDisplay 去觸發 drawRect
+        // drawRect 裡頭配置的 Arrow Class 才會 remove + add
+        [cell setNeedsDisplay];
+        
+        // 準備 距離 差
+        float fDist = [[dictionary objectForKey:@"Dist"] doubleValue];
+        fDist = fDist/1000;
+        cell.thirdLabel.text = [NSString stringWithFormat:@"距離%.2f公里",fDist];
+
     }
-    
+        
     // 顯示 Cell
     cell.firstLabel.text = (NSString*)[dictionary objectForKey:@"StayTime"];
     [DS CheckCarStatusWithPoint:[dictionary objectForKey:@"StartTime"] dateEnd:[dictionary objectForKey:@"EndTime"] retLabel:cell.secondLabel];
-    cell.thirdLabel.text = strDist;
 
     return;
 }
@@ -221,29 +239,29 @@ UIBarButtonItem *naByTimeButton;
     mapViewCtrl.trashCoordinate = trashCoordinate;
     
     // 取得 User 點座標
-    CLLocationManager *tmpLocationManager = [DS locationManager];
+    CLLocationManager *userLocation = [DS locationManager];
     
     // 產生 MapView Region , 且 trashCoordinate 與 user location 合成出 Center
     MKCoordinateRegion tmpMapViewRegion;
     // 檢查 user location
-    if( tmpLocationManager.location.coordinate.latitude!=0 || tmpLocationManager.location.coordinate.longitude!=0 )
+    if( userLocation.location.coordinate.latitude!=0 || userLocation.location.coordinate.longitude!=0 )
     {
         // 如果不是 Zero , 才 合成 Region Center,
         if(0)
         {
             // 兩點之間的垂心作為地圖中心顯示
-            tmpMapViewRegion.center.latitude = (tmpLocationManager.location.coordinate.latitude+trashCoordinate.latitude)/2;
-            tmpMapViewRegion.center.longitude = (tmpLocationManager.location.coordinate.longitude+trashCoordinate.longitude)/2;
-            tmpMapViewRegion.span.latitudeDelta = fabsf(tmpLocationManager.location.coordinate.latitude-trashCoordinate.latitude)*1.2;
-            tmpMapViewRegion.span.longitudeDelta = fabsf(tmpLocationManager.location.coordinate.longitude-trashCoordinate.longitude)*1.2;
+            tmpMapViewRegion.center.latitude = (userLocation.location.coordinate.latitude+trashCoordinate.latitude)/2;
+            tmpMapViewRegion.center.longitude = (userLocation.location.coordinate.longitude+trashCoordinate.longitude)/2;
+            tmpMapViewRegion.span.latitudeDelta = fabsf(userLocation.location.coordinate.latitude-trashCoordinate.latitude)*1.2;
+            tmpMapViewRegion.span.longitudeDelta = fabsf(userLocation.location.coordinate.longitude-trashCoordinate.longitude)*1.2;
         }
         else
         {
             // 以 user location 作為中心顯示
-            tmpMapViewRegion.center.latitude = tmpLocationManager.location.coordinate.latitude;
-            tmpMapViewRegion.center.longitude = tmpLocationManager.location.coordinate.longitude;
-            tmpMapViewRegion.span.latitudeDelta = fabsf(tmpLocationManager.location.coordinate.latitude-trashCoordinate.latitude)*2.2;
-            tmpMapViewRegion.span.longitudeDelta = fabsf(tmpLocationManager.location.coordinate.longitude-trashCoordinate.longitude)*2.2;
+            tmpMapViewRegion.center.latitude = userLocation.location.coordinate.latitude;
+            tmpMapViewRegion.center.longitude = userLocation.location.coordinate.longitude;
+            tmpMapViewRegion.span.latitudeDelta = fabsf(userLocation.location.coordinate.latitude-trashCoordinate.latitude)*2.2;
+            tmpMapViewRegion.span.longitudeDelta = fabsf(userLocation.location.coordinate.longitude-trashCoordinate.longitude)*2.2;
         }
     }
     else

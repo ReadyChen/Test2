@@ -12,6 +12,7 @@
 		7933010D1730F3550096C42A /* ByTimeViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7933010C1730F3550096C42A /* ByTimeViewCell.m */; };
 		7933011017319A580096C42A /* ByDistViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7933010F17319A580096C42A /* ByDistViewCell.m */; };
 		793301131731DFB60096C42A /* XMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = 793301111731DFB60096C42A /* XMLReader.m */; };
+		7935892F1738EE030050B257 /* Arrow.m in Sources */ = {isa = PBXBuildFile; fileRef = 7935892E1738EE030050B257 /* Arrow.m */; };
 		799776901733569A0035D247 /* TPE_V5_4133.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7997768F1733569A0035D247 /* TPE_V5_4133.xml */; };
 		79C2CF45172DA13F00A461A5 /* DataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 79C2CF44172DA13F00A461A5 /* DataSource.m */; };
 		79C2CF49172DF26200A461A5 /* MyAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 79C2CF48172DF26200A461A5 /* MyAnnotation.m */; };
@@ -47,6 +48,8 @@
 		7933010F17319A580096C42A /* ByDistViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ByDistViewCell.m; sourceTree = "<group>"; };
 		793301111731DFB60096C42A /* XMLReader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMLReader.m; sourceTree = "<group>"; };
 		793301121731DFB60096C42A /* XMLReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLReader.h; sourceTree = "<group>"; };
+		7935892D1738EE030050B257 /* Arrow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Arrow.h; sourceTree = "<group>"; };
+		7935892E1738EE030050B257 /* Arrow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Arrow.m; sourceTree = "<group>"; };
 		7997768F1733569A0035D247 /* TPE_V5_4133.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TPE_V5_4133.xml; sourceTree = "<group>"; };
 		79C2CF43172DA13F00A461A5 /* DataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = DataSource.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		79C2CF44172DA13F00A461A5 /* DataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = DataSource.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
@@ -148,6 +151,8 @@
 				79F9A67C172A1DB700F14616 /* ByTimeTableViewController.m */,
 				7933010B1730F3550096C42A /* ByTimeViewCell.h */,
 				7933010C1730F3550096C42A /* ByTimeViewCell.m */,
+				7935892D1738EE030050B257 /* Arrow.h */,
+				7935892E1738EE030050B257 /* Arrow.m */,
 				791FDF97172C15BF00F5F19F /* ByDistTableViewController.h */,
 				791FDF98172C15BF00F5F19F /* ByDistTableViewController.m */,
 				7933010E17319A570096C42A /* ByDistViewCell.h */,
@@ -267,6 +272,7 @@
 				7933010D1730F3550096C42A /* ByTimeViewCell.m in Sources */,
 				7933011017319A580096C42A /* ByDistViewCell.m in Sources */,
 				793301131731DFB60096C42A /* XMLReader.m in Sources */,
+				7935892F1738EE030050B257 /* Arrow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

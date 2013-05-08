@@ -15,4 +15,6 @@
 @property (nonatomic, weak) IBOutlet UILabel *thirdLabel;
 @property (nonatomic, weak) IBOutlet UILabel *fourthLabel;
 
+@property(assign,nonatomic) CGFloat fAngle;
+
 @end
