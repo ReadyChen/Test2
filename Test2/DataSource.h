@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
-@interface DataSource : NSObject
+@interface DataSource : NSObject <CLLocationManagerDelegate>
 
 @property(strong,nonatomic) NSMutableArray *MyArray;
 @property(strong,nonatomic) NSMutableArray *filteredByTimeMyArray;

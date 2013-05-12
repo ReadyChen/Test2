@@ -22,9 +22,14 @@
 #define RadiansToDegrees(radians)(radians * 180.0/M_PI)
 #define DegreesToRadians(degrees)(degrees * M_PI / 180.0)
 
-#define DEBUG_HHMM TRUE
-#define DEBUG_HH 23
-#define DEBUG_MM 35
+#define DEBUG_HHMM FALSE
+    #define DEBUG_HH 23
+    #define DEBUG_MM 35
+
 #define DISPLAY_RANGE 10
+#define DISPLAY_MAX 100
+
+#define DEFAULT_LAT 25.04838
+#define DEFAULT_LONG 121.53994
 
 #endif

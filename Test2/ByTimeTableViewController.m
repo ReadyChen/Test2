@@ -155,7 +155,6 @@ UIBarButtonItem *naByTimeButton;
     return [DS.filteredByTimeMyArray count];
 }
 
-
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
@@ -178,11 +177,18 @@ UIBarButtonItem *naByTimeButton;
 }
 
 -(void)setOneRawData:(NSDictionary *)dictionary toCell:(ByTimeViewCell *)cell
-{ 
+{
+    // refresh cell.
+    cell.bShowArrow = false;
+    cell.thirdLabel.text = @"";
+    
     // 準備 方向度數
     CLLocationManager *userLocation = [DS locationManager];
+    
     if( userLocation.location.coordinate.latitude!=0 || userLocation.location.coordinate.longitude!=0 )
     {
+        cell.bShowArrow = true;
+        
         // 如果不是 Zero , 才 計算方向 + 顯示方向,
         CLLocationCoordinate2D trashCoordinate;
         trashCoordinate.latitude = [[dictionary objectForKey:@"Latitude"] doubleValue];
@@ -202,24 +208,30 @@ UIBarButtonItem *naByTimeButton;
         {
             angle = fabsf(angle);
         }
+        
+        DebugLog(@" with user LM, now display Arrow %0.2f.",angle);
+        
         // 此時得到 四象限的 angle 值
         cell.fAngle = angle;
-        
-        // 不再透過 Label 顯示 Arrow
-        //cell.fourthLabel.text = [NSString stringWithFormat:@"%.0f", angle];
-
-        // 因為是 re-use cell , 需要透過 setNeedDisplay 去觸發 drawRect
-        // drawRect 裡頭配置的 Arrow Class 才會 remove + add
-        [cell setNeedsDisplay];
-        
+   
         // 準備 距離 差
         float fDist = [[dictionary objectForKey:@"Dist"] doubleValue];
-        fDist = fDist/1000;
-        cell.thirdLabel.text = [NSString stringWithFormat:@"距離%.2f公里",fDist];
+        if(fDist<1000)
+        {
+            cell.thirdLabel.text = [NSString stringWithFormat:@"距離%.0f公尺",fDist];
+        }
+        else
+        {
+            fDist = fDist/1000;
+            cell.thirdLabel.text = [NSString stringWithFormat:@"距離%.2f公里",fDist];
+        }
 
     }
-        
-    // 顯示 Cell
+    // 因為是 re-use cell , 需要透過 setNeedDisplay 去觸發 drawRect
+    // drawRect 裡頭配置的 Arrow Class 才會 remove + add
+    [cell setNeedsDisplay];
+    
+    // 在 Cell 顯示 到達 離開 的資訊 .
     cell.firstLabel.text = (NSString*)[dictionary objectForKey:@"StayTime"];
     [DS CheckCarStatusWithPoint:[dictionary objectForKey:@"StartTime"] dateEnd:[dictionary objectForKey:@"EndTime"] retLabel:cell.secondLabel];
 

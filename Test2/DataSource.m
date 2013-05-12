@@ -19,22 +19,77 @@
 @synthesize iDisplayRang;
 @synthesize tableDistView;
 @synthesize tableTimeView;
-@synthesize bAddLeavedFlag;
 
+@synthesize bAddLeavedFlag;
 
 -(id)init {
     return [self initWithAppID:nil];
 }
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+    DebugLog(@" LM didUpdateToLocation newLocation LM.lat %f, LM.Long %f", newLocation.coordinate.latitude, newLocation.coordinate.longitude);
+    //do your stuff
+}
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    DebugLog(@" LM didChangeAuthorizationStatus %d",status);
+    NSLog(@" LM.lat %f, LM.Long %f / %d", locationManager.location.coordinate.latitude, locationManager.location.coordinate.longitude, status);
+    
+    if(status==kCLAuthorizationStatusAuthorized)
+    {
+       [manager startUpdatingLocation];
+    }
+
+    // 下面的段落 , 是 DS init 的一部分
+    // 當 系統定位 條件每次(包含第一次)有改變, 就觸發 Filter Sort Dist MyArray & tableView refresh.
+    [self FilteringSortedArrayWithAdjust:0];
+    [tableDistView reloadData];
+    [tableTimeView reloadData];
+}
+
+-(void)locationManager: (CLLocationManager *)manager didFailWithError: (NSError *)error
+{
+    [manager stopUpdatingLocation];
+    
+    NSString *errorString;
+    DebugLog(@"locationManager didFailWithError %@",[error localizedDescription]);
+    
+    switch([error code]) {
+        case kCLErrorDenied:
+            //Access denied by user
+            errorString = @"Access to Location Services denied by user";
+            //Do something...
+            break;
+        case kCLErrorLocationUnknown:
+            //Probably temporary...
+            errorString = @"Location data unavailable";
+            //Do something else...
+            break;
+        default:
+            errorString = @"An unknown error has occurred";
+            break;
+    }
+    
+    //UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:errorString delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+    //[alert show];
+}
+
 -(id)initWithAppID:(id)input
 {
     if (self = [super init]) {
         
+        iDisplayRang = DISPLAY_RANGE;
+        bAddLeavedFlag = false;
+        
         MyArray = [[NSMutableArray alloc] init];
         filteredByDistMyArray = [[NSMutableArray alloc] init];
         filteredByTimeMyArray = [[NSMutableArray alloc] init];
-        
+
         // get System Current Location
         locationManager = [[CLLocationManager alloc] init];
+        locationManager.delegate = self;
         locationManager.distanceFilter = kCLDistanceFilterNone; // whenever we move
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters; // 100 m
         [locationManager startUpdatingLocation];
@@ -49,15 +104,10 @@
         NSString *path = [[NSBundle mainBundle] pathForResource:@"TPE_V5_4133" ofType:@"xml"];
         NSData *nsData = [NSData dataWithContentsOfFile:path];
         NSDictionary *xmlDictionary = [XMLReader dictionaryForXMLData:nsData error:&parseError];
-        
-        // Print the dictionary
-        //NSLog(@"%@", xmlDictionary);
+
+        // 產出 MyArray
         [self describeDictionary:xmlDictionary];
         
-        iDisplayRang = DISPLAY_RANGE;
-        [self FilteringSortedArrayWithAdjust:0];
-        
-        bAddLeavedFlag = false;
     }
     return self;
 }
@@ -79,7 +129,7 @@
         NSDictionary *keysvalue = [dict objectForKey: key];
         
         NSDictionary *allPlacemark = [keysvalue objectForKey: @"Placemark"];
-        NSLog(@" allPlacemark.count = %i", allPlacemark.count);
+        NSLog(@" Done allPlacemark.count = %i", allPlacemark.count);
         for(id onePlacemark in allPlacemark)
         {
             // 取出 XML 單比 Placemark 的各欄位(Key)值
@@ -148,11 +198,9 @@
             // 產生 Addr 字串
             NSString *strAddr = Address;
             
-            // 計算 trashPoint 與 user location 的直線距離
-            CLLocation *loc = [[CLLocation alloc] initWithLatitude:fLatitude longitude:fLongitude];
-            CLLocation *loc2 = [[CLLocation alloc] initWithLatitude:locationManager.location.coordinate.latitude longitude:locationManager.location.coordinate.longitude];
-            CLLocationDistance dist = [loc distanceFromLocation:loc2];
-            float fDist = (float)dist;
+
+            // 不 計算 trashPoint 與 user location 的直線距離 , 先填入 1.23 for Dummy.
+            float fDist = (float)1.23;
 
             dictionary = [[NSDictionary alloc] initWithObjectsAndKeys:
                           strStayTime,@"StayTime",
@@ -167,11 +215,88 @@
             [MyArray addObject:dictionary];
         }
     }
-    NSLog(@" MyArray.count = %i",MyArray.count);
+    NSLog(@" Done MyArray.count = %i",MyArray.count);
 }
 
 -(void)FilteringSortedArrayWithAdjust:(NSInteger)iAdjustRang
 {
+    // 就靠這個 iDisplayRang 做顯示數量的調控了
+    if((iDisplayRang + iAdjustRang) > 0)
+    {
+        if ((iDisplayRang + iAdjustRang) > DISPLAY_MAX )
+        {
+            // 超過 我設定的 顯示數量了
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"已顯示100筆資料"
+                                                            message:@"預設顯示上限為100筆,如有其他需求,請來信告知"
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"關閉"
+                                                  otherButtonTitles:nil];
+            [alert show];
+            NSLog(@"(iDisplayRang %d + iAdjustRang %d) > DISPLAY_MAX %d ",iDisplayRang,iAdjustRang,DISPLAY_MAX);
+            return;
+        }
+        
+        // 確保不會使 iDisplayRang 減成負值
+        iDisplayRang = iDisplayRang + iAdjustRang;
+    }
+    else
+    {
+        // 已經是最小值 10 了
+        return;
+    }
+    NSLog(@" iDisplayRang = %i ",iDisplayRang);
+    
+    
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    
+    
+    // 準備 MyArrayWithDist for 接下來的 ByDist & ByTime filter
+    NSMutableArray *MyArrayWithDist = [[NSMutableArray alloc] init];
+    
+    // 遞迴 MyArray , 準備產生 計算 Dist(距離) 的 MyArrayWithDist
+    for(id b in MyArray)
+    {
+        // 計算 trashPoint 與 user location 的直線距離
+        NSString *strStayTime = [b objectForKey:@"StayTime"];
+        NSDate *dateStartHHMM = [b objectForKey:@"StartTime"];
+        NSDate *dateEndHHMM = [b objectForKey:@"EndTime"];
+        double dLat = [[b objectForKey:@"Latitude"] doubleValue];
+        double dLong = [[b objectForKey:@"Longitude"] doubleValue];
+        NSString *strAddr = [b objectForKey:@"Addr"];
+        
+        CLLocation *loc = [[CLLocation alloc] initWithLatitude:dLat longitude:dLong];
+        CLLocation *loc2;
+        if(locationManager.location.coordinate.latitude!=0 && locationManager.location.coordinate.longitude!=0)
+        {
+            // 有取得 裝置系統定位
+            loc2 = [[CLLocation alloc] initWithLatitude:locationManager.location.coordinate.latitude longitude:locationManager.location.coordinate.longitude];
+        }
+        else
+        {
+            // 沒有取得 裝置系統定位 , 使用 App 預設點位
+            loc2 = [[CLLocation alloc] initWithLatitude:DEFAULT_LAT longitude:DEFAULT_LONG];
+        }
+        CLLocationDistance dist = [loc distanceFromLocation:loc2];
+        
+        NSDictionary *dictionary = [[NSDictionary alloc] init];
+        dictionary = [[NSDictionary alloc] initWithObjectsAndKeys:
+                      strStayTime,@"StayTime",
+                      dateStartHHMM,@"StartTime",
+                      dateEndHHMM, @"EndTime",
+                      [NSNumber numberWithDouble:dLong], @"Longitude",
+                      [NSNumber numberWithDouble:dLat], @"Latitude",
+                      [NSNumber numberWithFloat:dist], @"Dist",
+                      strAddr,@"Addr",
+                      nil];
+        
+        [MyArrayWithDist addObject:dictionary];
+    }
+    NSLog(@" Done MyArrayWithDist.count = %i",MyArrayWithDist.count);
+
+    
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    
+    
     // 清除 filteredByDistMyArray 全部舊資料
     [filteredByDistMyArray removeAllObjects];
     
@@ -181,15 +306,9 @@
 																	selector:@selector(compare:)] ;
 	
 	NSArray *descriptors = [NSArray arrayWithObject:nameDescriptor];
-	NSMutableArray *sortedByDistMyArray = (NSMutableArray*)[MyArray sortedArrayUsingDescriptors:descriptors];
+	NSMutableArray *sortedByDistMyArray = (NSMutableArray*)[MyArrayWithDist sortedArrayUsingDescriptors:descriptors];
     
-    // 就靠這個 iDisplayRang 做顯示數量的調控了
-    if((iDisplayRang + iAdjustRang) > 0)
-    {
-        // 確保不會使 iDisplayRang 減成負值
-        iDisplayRang = iDisplayRang + iAdjustRang;
-    }
-    NSLog(@" iDisplayRang = %i ",iDisplayRang);
+
     
     // 產生 filteredByDistMyArray
     for (NSDictionary *dict in sortedByDistMyArray)
@@ -214,9 +333,10 @@
             break;
         }
     }
-    NSLog(@" filteredByDistMyArray.count = %i",filteredByDistMyArray.count);
+        
     
-    
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
     
     
     // 清除 filteredByTimeMyArray 全部舊資料
@@ -253,7 +373,6 @@
         }
     }
     
-    NSLog(@" filteredByTimeMyArray.count = %i",filteredByTimeMyArray.count);
 
 }
 

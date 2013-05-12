@@ -14,7 +14,7 @@
 @synthesize firstLabel;
 @synthesize secondLabel;
 @synthesize thirdLabel;
-@synthesize fourthLabel;
+@synthesize bShowArrow;
 @synthesize fAngle;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
@@ -35,7 +35,7 @@
 
 - (void)drawRect:(CGRect)rect
 {
-    // 列舉 class in subviews
+    // 列舉 舊有 Arrow class in subviews, 找到就移除
     for (id b in self.subviews)
     {
         // isKingOfClass 有效
@@ -45,10 +45,18 @@
         }
     }
     
-    Arrow *view = [[Arrow alloc] initWithFrame:CGRectMake(210, 10, 80, 80)];
-    view.fAngle = fAngle;
-    [view setBackgroundColor: [UIColor clearColor]];
-    [self addSubview: view];
+    if(bShowArrow)
+    {
+        // 畫上 新的 Arrow class
+        Arrow *view = [[Arrow alloc] initWithFrame:CGRectMake(210, 10, 80, 80)];
+        view.fAngle = fAngle;
+        [view setBackgroundColor: [UIColor clearColor]];
+        [self addSubview: view];
+    }
+}
+
+-(void)removeArrow
+{
     
 }
 

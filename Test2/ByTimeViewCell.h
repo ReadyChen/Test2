@@ -13,8 +13,8 @@
 @property (nonatomic, weak) IBOutlet UILabel *firstLabel;
 @property (nonatomic, weak) IBOutlet UILabel *secondLabel;
 @property (nonatomic, weak) IBOutlet UILabel *thirdLabel;
-@property (nonatomic, weak) IBOutlet UILabel *fourthLabel;
 
+@property(assign,nonatomic) BOOL bShowArrow;
 @property(assign,nonatomic) CGFloat fAngle;
 
 @end
